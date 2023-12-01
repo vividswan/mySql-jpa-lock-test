@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class ProductService {
 
-	private ProductRepository productRepository;
+	private final ProductRepository productRepository;
 
 	@Transactional
 	public void decreaseStock(Long id, Long quantity) {

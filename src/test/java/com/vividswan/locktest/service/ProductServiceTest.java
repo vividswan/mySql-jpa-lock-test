@@ -74,4 +74,29 @@ class ProductServiceTest {
 		assertNotEquals(0, product.getQuantity());
 	}
 
+	@Test
+	@DisplayName("동시에 100개가 요청 되는 코드_in_synchronized")
+	public void synchronized에서_동시에_100개의_요청() throws InterruptedException {
+		int threadCount = 100;
+		ExecutorService executorService = Executors.newFixedThreadPool(20);
+		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+		for (int i = 0; i < threadCount; i++) {
+			executorService.submit(() -> {
+				try {
+					productService.synchronizedDecreaseStock(1L, 1L);
+				} finally {
+					countDownLatch.countDown();
+				}
+			});
+		}
+
+		countDownLatch.await();
+		Product product = productRepository.findById(1L)
+			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
+
+		// synchronized에 의해 equal, 하지만 synchronized는 프로세스 단위로 lock을 제어하기 때문에 다중 서버에선 유효하지 않음
+		assertEquals(0, product.getQuantity());
+	}
+
 }

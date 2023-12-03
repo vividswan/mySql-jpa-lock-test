@@ -98,4 +98,30 @@ class ProductServiceTest {
 		assertEquals(0, product.getQuantity());
 	}
 
+	@Test
+	@DisplayName("동시에 100개가 요청 되는 코드_in_pessimisticLock")
+	public void pessimisticLock에서_동시에_100개의_요청() throws InterruptedException {
+		int threadCount = 100;
+		ExecutorService executorService = Executors.newFixedThreadPool(20);
+		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+		for (int i = 0; i < threadCount; i++) {
+			executorService.submit(() -> {
+				try {
+					productService.decreaseStockInPessimisticLock(1L, 1L);
+				} finally {
+					countDownLatch.countDown();
+				}
+			});
+		}
+
+		countDownLatch.await();
+		Product product = productRepository.findByProductId(1L)
+			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
+
+		// 장점 : exclusiveLock(배타 Lock)에 의해 데이터 정합성 보장
+		// 장점 : 충돌이 빈번하게 일어날 때 낙관적 락보다 성능이 좋을 수 있음
+		// 단점 : 별도의 Lock 잡기 때문에 성능 감소가 있을 수 있음
+		assertEquals(0, product.getQuantity());
+	}
 }

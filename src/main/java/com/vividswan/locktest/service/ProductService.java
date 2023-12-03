@@ -39,4 +39,15 @@ public class ProductService {
 		productRepository.saveAndFlush(productById.get()); // 트랜잭션을 안쓰므로
 	}
 
+	@Transactional
+	public void decreaseStockInPessimisticLock(Long id, Long quantity) {
+		Optional<Product> productById = productRepository.findByProductIdIdInPessimisticLock(id);
+
+		if (productById.isEmpty()) {
+			throw new RuntimeException("It's a non-existent product.");
+		}
+
+		productById.get().decrease(quantity);
+	}
+
 }

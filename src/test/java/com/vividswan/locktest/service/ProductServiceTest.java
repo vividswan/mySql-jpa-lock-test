@@ -66,7 +66,6 @@ class ProductServiceTest {
 		}
 
 		countDownLatch.await();
-		productService.decreaseStock(1L, 1L);
 		Product product = productRepository.findById(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 

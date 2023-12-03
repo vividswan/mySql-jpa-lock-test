@@ -40,8 +40,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public void decreaseStockInPessimisticLock(Long id, Long quantity) {
-		Optional<Product> productById = productRepository.findByProductIdIdInPessimisticLock(id);
+	public void decreaseStockInPessimisticLock(Long productId, Long quantity) {
+		Optional<Product> productById = productRepository.findByProductIdInPessimisticLock(productId);
 
 		if (productById.isEmpty()) {
 			throw new RuntimeException("It's a non-existent product.");
@@ -51,8 +51,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public void decreaseStockInOptimisticLockInTransaction(Long id, Long quantity) {
-		Optional<Product> productById = productRepository.findByProductIdInOptimisticLock(id);
+	public void decreaseStockInOptimisticLockInTransaction(Long productId, Long quantity) {
+		Optional<Product> productById = productRepository.findByProductIdInOptimisticLock(productId);
 
 		if (productById.isEmpty()) {
 			throw new RuntimeException("It's a non-existent product.");

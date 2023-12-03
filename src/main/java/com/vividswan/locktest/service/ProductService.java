@@ -3,6 +3,7 @@ package com.vividswan.locktest.service;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vividswan.locktest.domain.Product;
@@ -61,4 +62,17 @@ public class ProductService {
 		productById.get().decrease(quantity);
 	}
 
+	// "Propagation.REQUIRES_NEW"는 해당 메소드를 새로운 트랜잭션으로 시작하도록 지시
+	// lock -> 비즈니스 로직 -> unlock -> 비즈니스 로직 commit으로 되는 것을 방지하고, lock -> REQUIRES_NEW (비즈니스 로직 & commit) -> unlock을 하기 위해
+	// 같은 클래스 파일에선 트랜잭션이 독립적으로 실행되지 않으므로 facade에서 호출
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void decreaseStockRequiresNew(Long productId, Long quantity) {
+		Optional<Product> productById = productRepository.findByProductId(productId);
+
+		if (productById.isEmpty()) {
+			throw new RuntimeException("It's a non-existent product.");
+		}
+
+		productById.get().decrease(quantity);
+	}
 }

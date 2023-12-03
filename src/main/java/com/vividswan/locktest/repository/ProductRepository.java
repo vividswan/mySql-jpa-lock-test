@@ -25,4 +25,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Lock(LockModeType.OPTIMISTIC)
 	@Query(value = "select p from Product p where p.productId = :productId")
 	Optional<Product> findByProductIdInOptimisticLock(@Param("productId") Long productId);
+
+	// 실무에선 Product Entity 대신 별도의 JDBC 등을 사용해야 함 (데이터 소스를 많이 차지하기 때문)
+	//     hikari:
+	//       maximum-pool-size: 40 옵션 추가
+	@Query(value = "select get_lock(:key, 3000)", nativeQuery = true)
+	void getLock(@Param("key") String key);
+
+	@Query(value = "select release_lock(:key)", nativeQuery = true)
+	void releaseLock(@Param("key") String key);
 }

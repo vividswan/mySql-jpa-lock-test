@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.StopWatch;
 
 import com.vividswan.locktest.domain.Product;
 import com.vividswan.locktest.repository.ProductRepository;
@@ -101,6 +102,10 @@ class ProductServiceTest {
 	@Test
 	@DisplayName("동시에 100개가 요청 되는 코드_in_pessimisticLock")
 	public void pessimisticLock에서_동시에_100개의_요청() throws InterruptedException {
+
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+
 		int threadCount = 100;
 		ExecutorService executorService = Executors.newFixedThreadPool(20);
 		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
@@ -116,6 +121,10 @@ class ProductServiceTest {
 		}
 
 		countDownLatch.await();
+
+		stopWatch.stop();
+		System.out.println("Test duration: " + stopWatch.getTotalTimeMillis() + " milliseconds");
+
 		Product product = productRepository.findByProductId(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 
@@ -128,6 +137,10 @@ class ProductServiceTest {
 	@Test
 	@DisplayName("동시에 100개가 요청 되는 코드_in_optimisticLock")
 	public void optimisticLock에서_동시에_100개의_요청() throws InterruptedException {
+
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+
 		int threadCount = 100;
 		ExecutorService executorService = Executors.newFixedThreadPool(20);
 		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
@@ -153,6 +166,10 @@ class ProductServiceTest {
 		}
 
 		countDownLatch.await();
+
+		stopWatch.stop();
+		System.out.println("Test duration: " + stopWatch.getTotalTimeMillis() + " milliseconds");
+
 		Product product = productRepository.findByProductId(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 

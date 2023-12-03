@@ -38,7 +38,7 @@ class ProductServiceTest {
 	@DisplayName("재고가 하나 감소하는 간단한 테스트 코드")
 	public void 재고_감소() {
 		// given
-		Product product = productRepository.findById(1L)
+		Product product = productRepository.findByProductId(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 
 		// when
@@ -66,7 +66,7 @@ class ProductServiceTest {
 		}
 
 		countDownLatch.await();
-		Product product = productRepository.findById(1L)
+		Product product = productRepository.findByProductId(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 
 		// race condition에 의해 not equal
@@ -91,7 +91,7 @@ class ProductServiceTest {
 		}
 
 		countDownLatch.await();
-		Product product = productRepository.findById(1L)
+		Product product = productRepository.findByProductId(1L)
 			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
 
 		// synchronized에 의해 equal, 하지만 synchronized는 프로세스 단위로 lock을 제어하기 때문에 다중 서버에선 유효하지 않음

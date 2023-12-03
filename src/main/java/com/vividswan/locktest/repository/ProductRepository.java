@@ -19,4 +19,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query(value = "select p from Product p where p.productId = :id")
 	Optional<Product> findByProductIdIdInPessimisticLock(@Param("id") Long id);
+
+	// 낙관적 락은 조회 시 쿼리문에서 "version" 조회
+	// org.hibernate.SQL   : update product set product_id=?,quantity=?,version=? where id=? and version=?
+	@Lock(LockModeType.OPTIMISTIC)
+	@Query(value = "select p from Product p where p.productId = :productId")
+	Optional<Product> findByProductIdInOptimisticLock(@Param("productId") Long productId);
 }

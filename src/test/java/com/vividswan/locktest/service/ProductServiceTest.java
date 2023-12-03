@@ -124,4 +124,40 @@ class ProductServiceTest {
 		// 단점 : 별도의 Lock 잡기 때문에 성능 감소가 있을 수 있음
 		assertEquals(0, product.getQuantity());
 	}
+
+	@Test
+	@DisplayName("동시에 100개가 요청 되는 코드_in_optimisticLock")
+	public void optimisticLock에서_동시에_100개의_요청() throws InterruptedException {
+		int threadCount = 100;
+		ExecutorService executorService = Executors.newFixedThreadPool(20);
+		CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+		for (int i = 0; i < threadCount; i++) {
+			executorService.submit(() -> {
+				try {
+					// OptimisticLockException은 Transaction에서 롤백 되므로 외부에서 Version이 안 맞을 때 처리
+					while (true) {
+						try {
+							productService.decreaseStockInOptimisticLockInTransaction(1L, 1L);
+							break;
+						} catch (Exception e) {
+							Thread.sleep(100);
+						}
+					}
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				} finally {
+					countDownLatch.countDown();
+				}
+			});
+		}
+
+		countDownLatch.await();
+		Product product = productRepository.findByProductId(1L)
+			.orElseThrow(() -> new RuntimeException("존재하지 않는 상품"));
+
+		// 장점 : 별도의 Lock 잡지 않으므로 성능상 이점이 있을 수 있음 (충돌이 빈번하게 일어나지 않을 때)
+		// 단점 : update 실패 시 재시도 로직을 개발자가 직접 작성해야 함
+		assertEquals(0, product.getQuantity());
+	}
 }

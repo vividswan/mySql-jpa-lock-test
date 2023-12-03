@@ -50,4 +50,15 @@ public class ProductService {
 		productById.get().decrease(quantity);
 	}
 
+	@Transactional
+	public void decreaseStockInOptimisticLockInTransaction(Long id, Long quantity) {
+		Optional<Product> productById = productRepository.findByProductIdInOptimisticLock(id);
+
+		if (productById.isEmpty()) {
+			throw new RuntimeException("It's a non-existent product.");
+		}
+
+		productById.get().decrease(quantity);
+	}
+
 }

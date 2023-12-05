@@ -16,6 +16,7 @@ import org.springframework.util.StopWatch;
 
 import com.vividswan.locktest.domain.Product;
 import com.vividswan.locktest.facade.NamedLockProductFacade;
+import com.vividswan.locktest.facade.OptimizeLockProductFacade;
 import com.vividswan.locktest.repository.ProductRepository;
 
 @SpringBootTest
@@ -28,6 +29,9 @@ class ProductServiceTest {
 
 	@Autowired
 	private NamedLockProductFacade namedLockProductFacade;
+
+	@Autowired
+	private OptimizeLockProductFacade optimizeLockProductFacade;
 
 	@BeforeEach
 	public void before() {
@@ -152,15 +156,7 @@ class ProductServiceTest {
 		for (int i = 0; i < threadCount; i++) {
 			executorService.submit(() -> {
 				try {
-					// OptimisticLockException은 Transaction에서 롤백 되므로 외부에서 Version이 안 맞을 때 처리
-					while (true) {
-						try {
-							productService.decreaseStockInOptimisticLockInTransaction(1L, 1L);
-							break;
-						} catch (Exception e) {
-							Thread.sleep(100);
-						}
-					}
+					optimizeLockProductFacade.decrease(1L, 1L);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				} finally {

@@ -39,7 +39,7 @@
 
 ```yml
      hikari:
-	       maximum-pool-size: 40 # 옵션 추가
+       maximum-pool-size: 40 # 옵션 추가
 ```
 
 - JPA에서 네임드락 구현
